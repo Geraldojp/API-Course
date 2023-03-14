@@ -1,5 +1,6 @@
 package com.example.belajar_spring.service;
 
+import com.example.belajar_spring.exception.NotFoundException;
 import com.example.belajar_spring.model.Course;
 import com.example.belajar_spring.repository.ICourseRepository;
 import com.example.belajar_spring.utils.CourseKey;
@@ -17,7 +18,7 @@ public class CourseService implements ICourseService {
         try {
             List<Course> courses = courseRepository.getAll();
             if(courses.isEmpty()){
-                throw new Exception("Empty");
+                throw new NotFoundException("Empty");
             }
             return courses;
         } catch (Exception e) {
@@ -44,7 +45,7 @@ public class CourseService implements ICourseService {
         try {
             Optional<Course> find = courseRepository.findById(id);
             if(find.isEmpty()){
-                throw new Exception("No such id");
+                throw new NotFoundException("No such id");
             }
             return find;
         } catch (Exception e) {
@@ -57,7 +58,7 @@ public class CourseService implements ICourseService {
         try {
             Optional<Course> find = courseRepository.findById(id);
             if(find.isEmpty()){
-                throw new Exception("ID not found");
+                throw new NotFoundException("ID not found");
             }
             courseRepository.update(course,id);
         } catch (Exception e) {
@@ -70,7 +71,7 @@ public class CourseService implements ICourseService {
         try {
             Optional<Course> find = courseRepository.findById(id);
             if(find.isEmpty()){
-                throw new Exception("ID not found");
+                throw new NotFoundException("ID not found");
             }
             courseRepository.delete(id);
         } catch (Exception e) {
@@ -83,7 +84,7 @@ public class CourseService implements ICourseService {
         try {
             Optional<List<Course>> find = courseRepository.findBy(with,value);
             if(find.isEmpty()){
-                throw new Exception("Not found");
+                throw new NotFoundException("Not found");
             }
             return find;
         } catch (Exception e) {

@@ -21,69 +21,42 @@ public class CourseController {
 
     @GetMapping
     public ResponseEntity getAllCourse(){
-        try {
-            List<Course> courseList = courseService.list();
-            return ResponseEntity.status(HttpStatus.OK).
-                    body(new SuccessResponse<List<Course>>("Success", courseList));
-        }catch (Exception e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).
-                    body(new ErrorResponse("404","Empty Data"));
-        }
+        List<Course> courseList = courseService.list();
+        return ResponseEntity.status(HttpStatus.OK).
+                body(new SuccessResponse<List<Course>>("Success", courseList));
+
     }
     @PostMapping
     public ResponseEntity createCourse(@RequestBody Course course){
-        try {
-            Course newCourse = courseService.create(course);
-            return ResponseEntity.status(HttpStatus.CREATED).
-                    body(new SuccessResponse<Course>("Created", newCourse));
-        }catch (Exception e){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).
-                    body(new ErrorResponse("500", "Failed"));
-        }
+        Course newCourse = courseService.create(course);
+        return ResponseEntity.status(HttpStatus.CREATED).
+                body(new SuccessResponse<Course>("Created", newCourse));
+
     }
     @GetMapping("/{id}")
     public ResponseEntity getById(@PathVariable String id){
-        try {
-            Optional<Course> course = courseService.get(id);
-            return ResponseEntity.status(HttpStatus.OK).
-                    body(new SuccessResponse<Optional<Course>>("Success", course));
-        }catch (Exception e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse("404", "ID Not Found"));
-        }
+        Optional<Course> course = courseService.get(id);
+        return ResponseEntity.status(HttpStatus.OK).
+                body(new SuccessResponse<Optional<Course>>("Success", course));
     }
     @DeleteMapping("/{id}")
     public ResponseEntity delete(@PathVariable String id){
-        try{
-            courseService.delete(id);
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).
-                    body(new SuccessResponse<String>("Success Delete", id));
-        }catch (Exception e){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).
-                    body(new ErrorResponse("500", "Failed to delete"));
-        }
+        courseService.delete(id);
+        return ResponseEntity.status(HttpStatus.OK).
+                body(new SuccessResponse<String>("Success Delete", id));
     }
     @PatchMapping("/{id}")
     public ResponseEntity edit(@RequestBody Course course,@PathVariable String id){
-        try {
-            courseService.update(course, id);
-            Optional<Course> find = courseService.get(course.getCourseId());
-            return ResponseEntity.status(HttpStatus.OK).
-                    body(new SuccessResponse<Optional<Course>>("Updated", find));
-        }catch (Exception e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).
-                    body(new ErrorResponse("400", "Failed to update"));
-        }
+        courseService.update(course, id);
+        Optional<Course> find = courseService.get(course.getCourseId());
+        return ResponseEntity.status(HttpStatus.OK).
+                body(new SuccessResponse<Optional<Course>>("Updated", find));
+
     }
     @GetMapping(params = {"key", "value"})
-    public ResponseEntity getBy(@RequestParam String key, @RequestParam String value){
-        try {
-            Optional<List<Course>> courses = courseService.findBy(CourseKey.valueOf(key), value);
-            System.out.println(courses);
-            return ResponseEntity.status(HttpStatus.OK).
-                    body(new SuccessResponse<Optional<List<Course>>>("Success", courses));
-        }catch (Exception e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).
-                    body(new ErrorResponse("404", "No Course Found"));
-        }
+    public ResponseEntity getBy(@RequestParam String key, @RequestParam String value) {
+        Optional<List<Course>> courses = courseService.findBy(CourseKey.valueOf(key), value);
+        System.out.println(courses);
+        return ResponseEntity.status(HttpStatus.OK).body(new SuccessResponse<Optional<List<Course>>>("Success", courses));
     }
 }
