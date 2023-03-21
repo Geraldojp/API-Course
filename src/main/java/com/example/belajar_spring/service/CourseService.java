@@ -2,6 +2,7 @@ package com.example.belajar_spring.service;
 
 import com.example.belajar_spring.exception.NotFoundException;
 import com.example.belajar_spring.model.Course;
+import com.example.belajar_spring.model.request.CourseRequest;
 import com.example.belajar_spring.repository.ICourseRepository;
 import com.example.belajar_spring.utils.CourseKey;
 import org.springframework.beans.factory.annotation.Autowired;
