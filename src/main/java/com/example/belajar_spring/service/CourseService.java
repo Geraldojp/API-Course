@@ -1,95 +1,128 @@
 package com.example.belajar_spring.service;
 
+import com.example.belajar_spring.exception.ExistedDataException;
 import com.example.belajar_spring.exception.NotFoundException;
 import com.example.belajar_spring.model.Course;
+import com.example.belajar_spring.model.CourseInfo;
+import com.example.belajar_spring.model.CourseType;
 import com.example.belajar_spring.model.request.CourseRequest;
-import com.example.belajar_spring.repository.ICourseRepository;
-import com.example.belajar_spring.utils.CourseKey;
+import com.example.belajar_spring.repository.CourseInfoRepository;
+import com.example.belajar_spring.repository.CourseRepository;
+import com.example.belajar_spring.repository.CourseTypeRepository;
+import com.example.belajar_spring.utils.specification.SearchCriteria;
+import com.example.belajar_spring.utils.specification.Spec;
+import org.aspectj.weaver.ast.Not;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+
 @Service
-public class CourseService implements ICourseService {
+public class CourseService implements ICourseService<Course> {
     @Autowired
-    private ICourseRepository courseRepository;
-    @Override
-    public List<Course> list() {
+    private CourseRepository courseRepository;
+    @Autowired
+    private CourseInfoService courseInfoService;
+    @Autowired
+    private CourseTypeService courseTypeService;
+    @Autowired
+    private ModelMapper modelMapper;
+
+    public Iterable<Course> findAll(Pageable pageable){
         try {
-            List<Course> courses = courseRepository.getAll();
-            if(courses.isEmpty()){
-                throw new NotFoundException("Empty");
-            }
-            return courses;
-        } catch (Exception e) {
+            Iterable<Course> find = courseRepository.findAll(pageable);
+            if(find == null)
+                throw new NotFoundException("Data not found");
+            return find;
+        }catch (NotFoundException e){
+            throw e;
+        }
+        catch (Exception e){
             throw new RuntimeException(e);
         }
     }
 
     @Override
     public Course create(Course course) {
+        return null;
+    }
+
+    public Course create(CourseRequest course){
         try {
-            Optional<List<Course>> findCourse = courseRepository.findBy(CourseKey.title, course.getTitle());
-            if(findCourse.isPresent()){
-                throw new IllegalStateException("Already Exist");
-            }else {
-                return courseRepository.create(course);
+            if(courseRepository.existsByTitleIgnoreCase(course.getTitle())){
+                throw new ExistedDataException("Data already exist");
             }
-        } catch (Exception e) {
+            CourseInfo courseInfo = modelMapper.map(course, CourseInfo.class);
+            CourseInfo setInfo = courseInfoService.create(courseInfo);
+            Optional<CourseType> courseType = courseTypeService.findById(course.getCourseType().getCourseTypeId());
+            Course newCourse = modelMapper.map(course, Course.class);
+            System.out.println(newCourse.toString());
+            newCourse.setCourseInfo(setInfo);
+            newCourse.setCourseType(courseType.get());
+
+            return courseRepository.save(newCourse);
+        }catch (ExistedDataException e){
+            throw e;
+        }
+        catch (Exception e){
             throw new RuntimeException(e);
         }
     }
-
-    @Override
-    public Optional<Course> get(String id) {
+    public Course update(Course course, Long id){
         try {
             Optional<Course> find = courseRepository.findById(id);
             if(find.isEmpty()){
-                throw new NotFoundException("No such id");
+                throw new NotFoundException("Data not found");
+            }
+            if(courseRepository.existsByTitleIgnoreCase(course.getTitle())){
+                throw new ExistedDataException("Data already exist");
+            }
+            course.setCourseId(id);
+            return courseRepository.save(course);
+        }catch (NotFoundException e){
+            throw e;
+        }
+        catch (ExistedDataException e){
+            throw e;
+        }
+        catch (Exception e){
+            throw new RuntimeException(e);
+        }
+    }
+    public void deleteById(Long id){
+        try {
+            Optional<Course> find = courseRepository.findById(id);
+            if(find.isEmpty()){
+                throw new NotFoundException("Data not found");
+            }
+            courseRepository.deleteById(id);
+        }catch (NotFoundException e){
+            throw e;
+        }
+        catch (Exception e){
+            throw new RuntimeException(e);
+        }
+    }
+    public Optional<Course> findById(Long id){
+        try {
+            Optional<Course> find = courseRepository.findById(id);
+            if(find.isEmpty()){
+                throw new NotFoundException("Data not found");
             }
             return find;
-        } catch (Exception e) {
+        }catch (NotFoundException e){
+            throw e;
+        }catch (Exception e){
             throw new RuntimeException(e);
         }
     }
-
-    @Override
-    public void update(Course course, String id) {
-        try {
-            Optional<Course> find = courseRepository.findById(id);
-            if(find.isEmpty()){
-                throw new NotFoundException("ID not found");
-            }
-            courseRepository.update(course,id);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public void delete(String id) {
-        try {
-            Optional<Course> find = courseRepository.findById(id);
-            if(find.isEmpty()){
-                throw new NotFoundException("ID not found");
-            }
-            courseRepository.delete(id);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public Optional<List<Course>> findBy(CourseKey with, String value) {
-        try {
-            Optional<List<Course>> find = courseRepository.findBy(with,value);
-            if(find.isEmpty()){
-                throw new NotFoundException("Not found");
-            }
-            return find;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    public List<Course> listBy(SearchCriteria searchCriteria) throws Exception{
+        Specification specification = new Spec<Course>().findBy(searchCriteria);
+        List<Course> courses = courseRepository.findAll(specification);
+        return courses;
     }
 }

@@ -1,35 +1,36 @@
 package com.example.belajar_spring.model;
 
+import jakarta.persistence.*;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
+@Entity
+@Table(name = "course")
+@Data
+@ToString
 public class Course {
-    @Getter@Setter
-    private String courseId;
-    @Getter@Setter
-    private  String title;
-    @Getter@Setter
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "course_id", nullable = false)
+    private Long courseId;
+
+    @Column(name = "title")
+    private String title;
+    @Column(name = "description")
     private String description;
-    @Getter@Setter
+    @Column(name = "link")
     private String link;
 
-    public Course(String courseId, String title, String description, String link) {
-        this.courseId = courseId;
-        this.title = title;
-        this.description = description;
-        this.link = link;
-    }
+    @OneToOne(cascade = {CascadeType.PERSIST})
+    @JoinColumn(name = "course_info_id")
+    private CourseInfo courseInfo;
 
-    public Course() {
-    }
+    @ManyToOne
+    @JoinColumn(name = "course_type_id")
+    private CourseType courseType;
 
-    @Override
-    public String toString() {
-        return "Course{" +
-                "courseId='" + courseId + '\'' +
-                ", title='" + title + '\'' +
-                ", description='" + description + '\'' +
-                ", link='" + link + '\'' +
-                '}';
-    }
 }

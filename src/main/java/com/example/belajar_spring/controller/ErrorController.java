@@ -1,5 +1,7 @@
 package com.example.belajar_spring.controller;
 
+import com.example.belajar_spring.exception.EmptyInputException;
+import com.example.belajar_spring.exception.ExistedDataException;
 import com.example.belajar_spring.exception.NotFoundException;
 import com.example.belajar_spring.model.response.ErrorResponse;
 import org.springframework.http.HttpStatus;
@@ -33,5 +35,15 @@ public class ErrorController {
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponse("X02", errors.toString()));
+    }
+    @ExceptionHandler
+    public ResponseEntity<ErrorResponse> handleExistedData(ExistedDataException e){
+        return ResponseEntity.status((HttpStatus.BAD_REQUEST))
+                .body(new ErrorResponse("X04", e.getMessage()));
+    }
+    @ExceptionHandler
+    public ResponseEntity<ErrorResponse> handleEmptyInput(EmptyInputException e){
+        return ResponseEntity.status((HttpStatus.BAD_REQUEST))
+                .body(new ErrorResponse("X02", e.getMessage()));
     }
 }

@@ -1,4 +1,4 @@
-package com.example.belajar_spring.utils;
+package com.example.belajar_spring.utils.validation;
 
 import io.jsonwebtoken.*;
 import jakarta.validation.Valid;
